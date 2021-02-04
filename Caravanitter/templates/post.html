@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+{% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">
+          {{ message }}
+        </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    {% if current_user.dark_mode == false %}
+        <div class="col-md-4 col-md-offset-4 mx-auto pt-5" style="padding: 10px 20px; border: 1px solid #dddddd; border-radius: 3px; margin: 80px 0 20px 0; max-width: 600px;">
+          <div class="media mb-3">
+          <img class="rounded-circle" style="height: 65px; width: 65px; margin-right: 16px;" src="{{ url_for('static', filename='img/' + post.author.pic) }}">
+          <div class="media-body">
+            <div style="padding-bottom: 1px; margin-bottom: 4px; border-bottom: 1px solid #e3e3e3">
+              <a class="mr-2" style="word-break: break-all;" href="{{ url_for('user', username=post.author.username)}}">@{{ post.author.username }}</a>
+              <small class="text-muted">{{ post.date.strftime('%d/%m/%Y') }}</small>
+              {% if post.edit == 1 %}
+                <small class="text-muted">(Editado)</small>
+              {% endif %}
+              {% if current_user == post.author %}
+              <a href="{{ url_for('update_post', post_id=post.id)}}"><i class="fas fa-cog" style="color: #030322;"></i></a>
+              {% endif %}
+            </div>
+            <h2 style="word-break: break-word; color: #444444; text-decoration: none;" >{{ post.title }}</h2>
+            <p style="word-break: break-word;">{{ post.content }}</p>
+            <div class="pb-2">
+              {% if post.pic != "0" %}
+            <img class="rounded" style="height: 50%; width: 50%" src="{{ url_for('static', filename='img/' + post.pic) }}" alt="">
+            {% endif %}
+          </div>
+          </div>
+          </div>
+          <div class="row justify-content-around pb-1 mb-3" style="border-bottom: 1px solid #e3e3e3">
+            <div>
+            {% if current_user.has_liked_post(post) %}
+                  <a href="{{ url_for('like_post', post_id=post.id, action='unlike') }}"><i class="fas fa-heart" style="color: #b80707;"></i></a>
+                {% else %}
+                  <a href="{{ url_for('like_post', post_id=post.id, action='like') }}"><i style="color: #30303d;" class="far fa-heart"></i></a>
+                {% endif %}
+                {{ post.likes.count() }}
+              </div>
+            <div>
+              {% if current_user.has_shared_post(post) %}
+                    <a href="{{ url_for('share_post', post_id=post.id, action='unshare') }}"><i class="far fa-share-square" style="color: #51a2d1;"></i></a>
+                  {% else %}
+                    <a href="{{ url_for('share_post', post_id=post.id, action='share') }}"><i style="color: #30303d;" class="far fa-share-square"></i></a>
+                  {% endif %}
+                  {{ post.shares.count() }}
+                </div>
+          </div>
+          <div>
+            <form action="" method="post" enctype="multipart/form-data">
+              {{ form.hidden_tag() }}
+              <div class="mb-2">
+              {{ form.content(class="form-control contador",  maxlength="240", placeholder="Insira um comentário:", style="resize: none;")}}
+              <div><b><span class="caracteres">0</span>/240</b></div>
+            </div>
+            <div class="form-group">
+              {{ form.picture.label() }}
+              {{ form.picture(class="form-control-file") }}
+              {% if form.picture.errors %}
+      
+              {% for error in form.picture.errors %}
+                  <span class="text-danger"> {{ error }} </span></br>
+              {% endfor %}
+              {% endif %}
+      
+          </div>
+              {{ form.submit(class="btn btn-outline-info") }}
+            </form>
+          </div>
+          <div>
+            {% for comment in comments %}
+            <div class="media col-md-4 col-md-offset-4 mx-auto pt-3 mt-2" style=" border-top: 1px solid #e3e3e3; max-width: 600px;">
+                  <img class="rounded-circle" style="height: 65px; width: 65px; margin-right: 16px;" src="{{ url_for('static', filename='img/' + comment.comment_author.pic) }}">
+                  <div class="media-body">
+                    <div style="padding-bottom: 1px; margin-bottom: 4px;">
+                      <a class="mr-2" style="word-break: break-all;" href="{{ url_for('user', username=comment.comment_author.username)}}">@{{ comment.comment_author.username }}</a>
+                      <small class="text-muted">{{ comment.date.strftime('%d/%m/%Y') }}</small>
+                      {% if comment.edit == 1 %}
+                        <small class="text-muted">(Editado)</small>
+                      {% endif %}
+                      {% if current_user == comment.comment_author %}
+                      <a href="{{ url_for('update_comment', comment_id=comment.id)}}"><i class="fas fa-cog" style="color: #030322;"></i></a>
+                      {% endif %}
+                    </div>
+                    <p style="word-break: break-word;">{{ comment.content }}</p>
+                    {% if comment.pic != "0" %}
+                    <div class="pb-2">
+                    <img class="rounded" style="height: 30%; width: 30%" src="{{ url_for('static', filename='img/' + comment.pic) }}" alt="">
+                    </div>
+                    {% endif %}
+                    <div class="pb-2">
+                      {% if current_user.has_liked_comment(comment) %}
+                        <a href="{{ url_for('like_comment', comment_id=comment.id, action='unlike') }}"><i class="fas fa-heart" style="color: #b80707;"></i></a>
+                      {% else %}
+                        <a href="{{ url_for('like_comment', comment_id=comment.id, action='like') }}"><i style="color: #30303d;" class="far fa-heart"></i></a>
+                      {% endif %}
+                      {{ comment.likes.count() }}
+                    </div>
+                  </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% else %}
+        <div class="col-md-4 col-md-offset-4 mx-auto pt-5" style="padding: 10px 20px; background-color:rgb(52, 55, 56); border-radius: 3px; margin: 80px 0 20px 0; max-width: 600px;">
+          <div class="media mb-3">
+          <img class="rounded-circle" style="height: 65px; width: 65px; margin-right: 16px;" src="{{ url_for('static', filename='img/' + post.author.pic) }}">
+          <div class="media-body">
+            <div style="padding-bottom: 1px; margin-bottom: 4px; border-bottom: 1px solid #777676">
+              <a class="mr-2" style="word-break: break-all;" href="{{ url_for('user', username=post.author.username)}}">@{{ post.author.username }}</a>
+              <small class="text-muted">{{ post.date.strftime('%d/%m/%Y') }}</small>
+              {% if post.edit == 1 %}
+                <small class="text-muted">(Editado)</small>
+              {% endif %}
+              {% if current_user == post.author %}
+              <a href="{{ url_for('update_post', post_id=post.id)}}"><i class="fas fa-cog" style="color: #8a8ab4;"></i></a>
+              {% endif %}
+            </div>
+            <h2 style="word-break: break-word; color: #e9e9e9; text-decoration: none;" >{{ post.title }}</h2>
+            <p style="word-break: break-word; color: white;">{{ post.content }}</p>
+            <div class="pb-2">
+              {% if post.pic != "0" %}
+            <img class="rounded" style="height: 50%; width: 50%" src="{{ url_for('static', filename='img/' + post.pic) }}" alt="">
+            {% endif %}
+          </div>
+          </div>
+          </div>
+          <div class="row justify-content-around pb-1 mb-3" style="border-bottom: 1px solid #777676">
+            <div class="row">
+            {% if current_user.has_liked_post(post) %}
+                  <a href="{{ url_for('like_post', post_id=post.id, action='unlike') }}"><i class="fas fa-heart" style="color: #b80707;"></i></a>
+                {% else %}
+                  <a href="{{ url_for('like_post', post_id=post.id, action='like') }}"><i style="color: #777676;" class="far fa-heart"></i></a>
+                {% endif %}
+                <div class="ml-1 text-white">{{ post.likes.count() }}</div>
+              </div>
+            <div class="row">
+              {% if current_user.has_shared_post(post) %}
+                    <a href="{{ url_for('share_post', post_id=post.id, action='unshare') }}"><i class="far fa-share-square" style="color: #51a2d1;"></i></a>
+                  {% else %}
+                    <a href="{{ url_for('share_post', post_id=post.id, action='share') }}"><i style="color: #777676;" class="far fa-share-square"></i></a>
+                  {% endif %}
+                  <div class="ml-1 text-white">{{ post.shares.count() }}</div>
+                </div>
+          </div>
+          <div>
+            <form action="" method="post" enctype="multipart/form-data">
+              {{ form.hidden_tag() }}
+              <div class="mb-2">
+              {{ form.content(class="form-control text-white contador",  maxlength="240", placeholder="Insira um comentário:", style="resize: none; background-color:rgb(60, 60, 60); border: None;")}}
+              <div class="text-white"><b><span class="caracteres">0</span>/240</b></div>
+            </div>
+            <div class="form-group">
+              {{ form.picture.label(class="text-white") }}
+              {{ form.picture(class="form-control-file text-white") }}
+              {% if form.picture.errors %}
+      
+              {% for error in form.picture.errors %}
+                  <span class="text-danger"> {{ error }} </span></br>
+              {% endfor %}
+              {% endif %}
+      
+          </div>
+              {{ form.submit(class="btn btn-outline-info") }}
+            </form>
+          </div>
+          <div class="pb-3">
+            {% for comment in comments %}
+            <div class="media col-md-4 col-md-offset-4 mx-auto pt-3 mt-2" style=" border-radius: 3px; max-width: 600px; background-color:rgb(65, 65, 65);">
+                  <img class="rounded-circle" style="height: 65px; width: 65px; margin-right: 16px;" src="{{ url_for('static', filename='img/' + comment.comment_author.pic) }}">
+                  <div class="media-body">
+                    <div style="padding-bottom: 1px; margin-bottom: 4px;">
+                      <a class="mr-2" style="word-break: break-all;" href="{{ url_for('user', username=comment.comment_author.username)}}">@{{ comment.comment_author.username }}</a>
+                      <small class="text-muted">{{ comment.date.strftime('%d/%m/%Y') }}</small>
+                      {% if comment.edit == 1 %}
+                        <small class="text-muted">(Editado)</small>
+                      {% endif %}
+                      {% if current_user == comment.comment_author %}
+                      <a href="{{ url_for('update_comment', comment_id=comment.id)}}"><i class="fas fa-cog" style="color: #8a8ab4;"></i></a>
+                      {% endif %}
+                    </div>
+                    <p class="text-white" style="word-break: break-word;">{{ comment.content }}</p>
+                    {% if comment.pic != "0" %}
+                    <div class="pb-2">
+                    <img class="rounded" style="height: 30%; width: 30%" src="{{ url_for('static', filename='img/' + comment.pic) }}" alt="">
+                    </div>
+                    {% endif %}
+                    <div class="pb-2 row">
+                      {% if current_user.has_liked_comment(comment) %}
+                        <a href="{{ url_for('like_comment', comment_id=comment.id, action='unlike') }}"><i class="fas fa-heart" style="color: #b80707;"></i></a>
+                      {% else %}
+                        <a href="{{ url_for('like_comment', comment_id=comment.id, action='like') }}"><i style="color: #777676;" class="far fa-heart"></i></a>
+                      {% endif %}
+                      <div class="text-white ml-1">{{ comment.likes.count() }}</div>
+                    </div>
+                  </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+{% endblock content %}

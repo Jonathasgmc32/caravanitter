@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block content %}
+{% if current_user.dark_mode == false %}
+<div class="col-md-4 col-md-offset-4 mx-auto pt-5 text-center">
+    <h2 class="account-heading">Notificações:</h2>
+</div>
+{% if notify.count() > 0 %}
+{% for notify in notify %}
+{% if notify.action != "está seguindo você." %}
+<article class="media col-md-4 col-md-offset-4 mx-auto pt-3" style="padding: 10px 20px; border: 1px solid #dddddd; border-radius: 3px; margin-bottom: 20px; max-width: 600px;">
+    <img class="rounded-circle article-img" style="height: 65px; width: 65px; margin-right: 16px;" src="{{ url_for('static', filename='img/' + notify.causer_author.pic) }}">
+    <div class="media-body">
+      <div style="padding-bottom: 1px; margin-bottom: 4px; border-bottom: 1px solid #e3e3e3">
+        <small class="text-muted">{{ notify.date.strftime('%d/%m/%Y') }}</small>
+      </div>
+     <a href="{{ url_for('delete_notifications', notify_id=notify.id)}}"><p style="word-break: break-word;">{{ notify.causer_author.username }} {{ notify.action }} "{{ notify.content }}"</p></a> 
+    </div>
+</article>
+{% else %}
+<article class="media col-md-4 col-md-offset-4 mx-auto pt-3" style="padding: 10px 20px; border: 1px solid #dddddd; border-radius: 3px; margin-bottom: 20px; max-width: 600px;">
+  <img class="rounded-circle article-img" style="height: 65px; width: 65px; margin-right: 16px;" src="{{ url_for('static', filename='img/' + notify.causer_author.pic) }}">
+  <div class="media-body">
+    <div style="padding-bottom: 1px; margin-bottom: 4px; border-bottom: 1px solid #e3e3e3">
+      <small class="text-muted">{{ notify.date.strftime('%d/%m/%Y') }}</small>
+    </div>
+   <a href="{{ url_for('delete_notifications', notify_id=notify.id)}}"><p style="word-break: break-word;">{{ notify.causer_author.username }} {{ notify.action }}</p></a> 
+  </div>
+</article>
+{% endif %}
+{% endfor %}
+{% else %}
+<article class="col-md-4 col-md-offset-4 mx-auto pt-3 text-center" style="padding: 10px 20px; border: 1px solid #dddddd; border-radius: 3px; margin-bottom: 20px; max-width: 600px;">
+  <p>Nenhuma notificação.</p>
+</article>
+{% endif %}
+{% else %}
+<div class="col-md-4 col-md-offset-4 mx-auto pt-5 text-center">
+  <h2 class="account-heading text-white">Notificações:</h2>
+</div>
+{% if notify.count() > 0 %}
+{% for notify in notify %}
+{% if notify.action != "está seguindo você." %}
+<article class="media col-md-4 col-md-offset-4 mx-auto pt-3" style="padding: 10px 20px; background-color:rgb(52, 55, 56); border-radius: 3px; margin-bottom: 20px; max-width: 600px;">
+  <img class="rounded-circle article-img" style="height: 65px; width: 65px; margin-right: 16px;" src="{{ url_for('static', filename='img/' + notify.causer_author.pic) }}">
+  <div class="media-body">
+    <div style="padding-bottom: 1px; margin-bottom: 4px; border-bottom: 1px solid #777676">
+      <small class="text-muted">{{ notify.date.strftime('%d/%m/%Y') }}</small>
+    </div>
+   <a href="{{ url_for('delete_notifications', notify_id=notify.id)}}"><p style="word-break: break-word;">{{ notify.causer_author.username }} {{ notify.action }} "{{ notify.content }}"</p></a> 
+  </div>
+</article>
+{% else %}
+<article class="media col-md-4 col-md-offset-4 mx-auto pt-3" style="padding: 10px 20px; background-color:rgb(52, 55, 56); border-radius: 3px; margin-bottom: 20px; max-width: 600px;">
+<img class="rounded-circle article-img" style="height: 65px; width: 65px; margin-right: 16px;" src="{{ url_for('static', filename='img/' + notify.causer_author.pic) }}">
+<div class="media-body">
+  <div style="padding-bottom: 1px; margin-bottom: 4px; border-bottom: 1px solid #777676">
+    <small class="text-muted">{{ notify.date.strftime('%d/%m/%Y') }}</small>
+  </div>
+ <a href="{{ url_for('delete_notifications', notify_id=notify.id)}}"><p style="word-break: break-word;">{{ notify.causer_author.username }} {{ notify.action }}</p></a> 
+</div>
+</article>
+{% endif %}
+{% endfor %}
+{% else %}
+<article class="col-md-4 col-md-offset-4 mx-auto pt-3 text-center" style="padding: 10px 20px; background-color:rgb(52, 55, 56); border-radius: 3px; margin-bottom: 20px; max-width: 600px;">
+<p class="text-white">Nenhuma notificação.</p>
+</article>
+{% endif %}
+{% endif %}
+{% endblock %}

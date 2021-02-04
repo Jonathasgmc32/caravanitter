@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% block content %}
+{% if current_user.dark_mode == false%}
+<div class="col-md-4 col-md-offset-4 mx-auto pt-5">
+    <h2>Atualizar perfil</h2>
+<form action="" method="post" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        {{ form.username.label(class="form-control-label") }}
+        
+        {% if form.username.errors %}
+           {{ form.username(class="form-control is-invalid")}}
+              <div class="invalid-feedback">
+                  {% for error in form.username.errors %}
+                    <span> {{ error }} </span>
+                  {% endfor %}
+              </div>
+        {% else %}
+            {{ form.username(class="form-control", maxlength="20")}}
+        {% endif %}
+    </div> 
+    <div class="form-group">
+        {{ form.name.label(class="form-control-label") }}
+        {% if form.name.errors %}
+                {{ form.name(class="form-control is-invalid")}}
+                <div class="invalid-feedback">
+                    {% for error in form.name.errors %}
+                    <span> {{ error }} </span>
+                    {% endfor %}
+                </div>
+            {% else %}
+            {{ form.name(class="form-control", maxlength="40")}}
+            {% endif %}
+    </div>
+    <div class="form-group">
+        {{ form.card.label(class="form-control-label") }}
+        {% if form.card.errors %}
+                {{ form.card(class="form-control is-invalid")}}
+                <div class="invalid-feedback">
+                    {% for error in form.card.errors %}
+                    <span> {{ error }} </span>
+                    {% endfor %}
+                </div>
+            {% else %}
+            {{ form.card(class="form-control contador", style="resize: none", rows="8", maxlength="240")}}
+            <div><b><span class="caracteres">0</span>/240</b></div>
+            {% endif %}
+    </div>
+    <div class="form-group">
+        {{ form.picture.label() }}
+        {{ form.picture(class="form-control-file") }}
+        {% if form.picture.errors %}
+
+        {% for error in form.picture.errors %}
+            <span class="text-danger"> {{ error }} </span></br>
+        {% endfor %}
+        {% endif %}
+
+    </div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }}">
+      {{ message }}
+    </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<div class="form-group">
+    {{ form.submit(class="btn btn-info") }}
+    <a href="{{url_for('perfil')}}"><button type="button" class="btn btn-primary">Voltar</button></a>
+</div>
+
+</form>
+</div>
+{% else %}
+<div class="col-md-4 col-md-offset-4 mx-auto pt-3 pb-3" style="border-radius: 10px; background-color:rgb(52, 55, 56); margin: 80px 0 20px 0;">
+    <h2 class="text-white">Atualizar perfil</h2>
+<form action="" method="post" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        {{ form.username.label(class="form-control-label text-white") }}
+        
+        {% if form.username.errors %}
+           {{ form.username(class="form-control is-invalid")}}
+              <div class="invalid-feedback">
+                  {% for error in form.username.errors %}
+                    <span> {{ error }} </span>
+                  {% endfor %}
+              </div>
+        {% else %}
+            {{ form.username(class="form-control text-white contador", maxlength="20", style="background-color:rgb(60, 60, 60); border: None;")}}
+        {% endif %}
+    </div> 
+    <div class="form-group">
+        {{ form.name.label(class="form-control-label text-white") }}
+        {% if form.name.errors %}
+                {{ form.name(class="form-control is-invalid")}}
+                <div class="invalid-feedback">
+                    {% for error in form.name.errors %}
+                    <span> {{ error }} </span>
+                    {% endfor %}
+                </div>
+            {% else %}
+            {{ form.name(class="form-control text-white contador",  maxlength="40", style="background-color:rgb(60, 60, 60); border: None;")}}
+            {% endif %}
+    </div>
+    <div class="form-group">
+        {{ form.card.label(class="form-control-label text-white") }}
+        {% if form.card.errors %}
+                {{ form.card(class="form-control is-invalid")}}
+                <div class="invalid-feedback">
+                    {% for error in form.card.errors %}
+                    <span> {{ error }} </span>
+                    {% endfor %}
+                </div>
+            {% else %}
+            {{ form.card(class="form-control text-white contador", style="resize: none; background-color:rgb(60, 60, 60); border: None;", rows="8", maxlength="240")}}
+            <div class="text-white"><b><span class="caracteres">0</span>/240</b></div>
+            {% endif %}
+    </div>
+    <div class="form-group">
+        {{ form.picture.label(class="text-white") }}
+        {{ form.picture(class="form-control-file text-white") }}
+        {% if form.picture.errors %}
+
+        {% for error in form.picture.errors %}
+            <span class="text-danger"> {{ error }} </span></br>
+        {% endfor %}
+        {% endif %}
+
+    </div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }}">
+      {{ message }}
+    </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+
+<div class="form-group">
+    {{ form.submit(class="btn btn-info") }}
+    <a href="{{url_for('perfil')}}"><button type="button" class="btn btn-primary">Voltar</button></a>
+</div>
+
+</form>
+</div>
+{% endif %}
+{% endblock %}

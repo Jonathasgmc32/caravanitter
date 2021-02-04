@@ -1,0 +1,445 @@
+{% extends 'base.html' %}
+{% block content %}
+{% if current_user.dark_mode == false %}
+<div class="col-md-4 col-md-offset-4 mx-auto pt-5 text-center">
+    <img width="125px" height="125px" class="rounded-circle account-img" src="{{ image_file }}">
+    <h2 class="account-heading" style="word-break: break-all;">{{ current_user.username }}</h2>
+    <p class="text-secundary" style="word-break: break-all;"> {{ current_user.name }} </p>
+    <p class="text-secundary" style="word-break: break-all;"> {{ current_user.card }} </p>
+    <p>{{ current_user.followers.count() }} seguidores, {{ current_user.followed.count() }} seguindo.</p>
+    <a href="{{url_for('atualizar_perfil')}}"> <button class="btn btn-info"> Atualizar Perfil </button></a>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }} mt-2">
+      {{ message }}
+    </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+</div>
+<div class="accordion col-md-6 mx-auto pt-5" id="accordionExample">
+  <div class="card">
+    <div class="card-header bg-dark" id="headingOne">
+      <h5 class="mb-0 text-center">
+      <button class="btn btn-link text-white" style="text-decoration: none;" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+      Suas postagens:
+      </button>
+      </h5>
+    </div>
+    <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample" >
+      <div class="card-body">
+    {% if posts.count() > 0 %}
+    {% for post in posts %}
+      <div class="col-md-4 col-md-offset-4 mx-auto pt-5" style="padding: 10px 20px; max-width: 600px;">
+        <div class="media mb-3">
+          <img class="rounded-circle" style="height: 65px; width: 65px; margin-right: 16px;" src="{{ url_for('static', filename='img/' + post.author.pic) }}">
+            <div class="media-body">
+              <div style="padding-bottom: 1px; margin-bottom: 4px; border-bottom: 1px solid #e3e3e3">
+                <a class="mr-2" style="word-break: break-all;" href="{{ url_for('user', username=post.author.username)}}">@{{ post.author.username }}</a>
+                <small class="text-muted">{{ post.date.strftime('%d/%m/%Y') }}</small>
+                {% if post.edit == 1 %}
+                <small class="text-muted">(Editado)</small>
+                {% endif %}
+                {% if current_user == post.author %}
+                <a href="{{ url_for('update_post', post_id=post.id)}}"><i class="fas fa-cog" style="color: #030322;"></i></a>
+                {% endif %}
+              </div>
+          <h2 style="word-break: break-word; color: #444444; text-decoration: none;" >{{ post.title }}</h2>
+          <p style="word-break: break-word;">{{ post.content }}</p>
+              <div class="pb-2">
+              {% if post.pic != "0" %}
+              <img class="rounded" style="height: 50%; width: 50%" src="{{ url_for('static', filename='img/' + post.pic) }}" alt="">
+              {% endif %}
+              </div>
+            </div>
+            </div>
+          </div>
+        <div class="row justify-content-around pb-1 mb-3" style="border-bottom: 1px solid #e3e3e3">
+          <div>
+          {% if current_user.has_liked_post(post) %}
+          <a href="{{ url_for('like_post', post_id=post.id, action='unlike') }}"><i class="fas fa-heart" style="color: #b80707;"></i></a>
+          {% else %}
+          <a href="{{ url_for('like_post', post_id=post.id, action='like') }}"><i style="color: #30303d;" class="far fa-heart"></i></a>
+          {% endif %}
+          {{ post.likes.count() }}
+          </div>
+            <div>
+              <a href="{{ url_for('post', post_id=post.id)}}"> <i class="fas fa-comment"></i></a> {{ post.comments.count() }}
+            </div>
+            <div>
+            {% if current_user.has_shared_post(post) %}
+            <a href="{{ url_for('share_post', post_id=post.id, action='unshare') }}"><i class="far fa-share-square" style="color: #51a2d1;"></i></a>
+            {% else %}
+            <a href="{{ url_for('share_post', post_id=post.id, action='share') }}"><i style="color: #30303d;" class="far fa-share-square"></i></a>
+            {% endif %}
+            {{ post.shares.count() }}
+            </div>
+        </div>
+  {% endfor %}
+  {% else %}
+  <div class="col-md-4 col-md-offset-4 mx-auto text-center" style="padding: 10px 20px; max-width: 600px;">
+  <p> Você não fez nenhuma postagem.</p>
+  </div>
+  {% endif %}
+</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header bg-dark" id="headingTwo">
+      <h5 class="mb-0 text-center">
+        <button class="btn btn-link collapsed text-white" style="text-decoration: none" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+          Postagens compartilhadas:
+        </button>
+      </h5>
+    </div>
+    <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+      <div class="card-body">
+        {% if share.count() > 0 %}
+        {% for share in share %}
+        <div class="col-md-4 col-md-offset-4 mx-auto pt-5" style="padding: 10px 20px; max-width: 600px;">
+          <div class="media mb-3">
+            <img class="rounded-circle" style="height: 65px; width: 65px; margin-right: 16px;" src="{{ url_for('static', filename='img/' + share.posts.author.pic) }}">
+            <div class="media-body">
+              <div style="padding-bottom: 1px; margin-bottom: 4px; border-bottom: 1px solid #e3e3e3">
+                <a class="mr-2" style="word-break: break-all;" href="{{ url_for('user', username=share.posts.author.username)}}">@{{ share.posts.author.username }}</a>
+                <small class="text-muted">{{ share.posts.date.strftime('%d/%m/%Y') }}</small>
+                {% if share.posts.edit == 1 %}
+                <small class="text-muted">(Editado)</small>
+                {% endif %}
+                {% if current_user == share.posts.author %}
+                <a href="{{ url_for('update_post', post_id=share.post_id)}}"><i class="fas fa-cog" style="color: #030322;"></i></a>
+                {% endif %}
+              </div>
+                <h2><a style="word-break: break-word; color: #444444; text-decoration: none;" href="{{ url_for('post', post_id=share.post_id)}}">{{ share.posts.title }}</a></h2>
+                <p style="word-break: break-word;">{{ share.posts.content }}</p>
+              <div class="pb-2">
+              {% if share.posts.pic != "0" %}
+              <img class="rounded" style="height: 50%; width: 50%" src="{{ url_for('static', filename='img/' + share.posts.pic) }}" alt="">
+              {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row justify-content-around pb-1 mb-3" style="border-bottom: 1px solid #e3e3e3">
+          <div>
+          {% if current_user.has_liked_post(share.posts) %}
+          <a href="{{ url_for('like_post', post_id=share.post_id, action='unlike') }}"><i class="fas fa-heart" style="color: #b80707;"></i></a>
+          {% else %}
+          <a href="{{ url_for('like_post', post_id=share.post_id, action='like') }}"><i style="color: #30303d;" class="far fa-heart"></i></a>
+          {% endif %}
+          {{ share.posts.likes.count() }}
+          </div>
+          <div>
+            <a href="{{ url_for('post', post_id=share.post_id)}}"> <i class="fas fa-comment"></i></a> {{ share.posts.comments.count() }}
+          </div>
+          <div>
+            {% if current_user.has_shared_post(share.posts) %}
+            <a href="{{ url_for('share_post', post_id=share.post_id, action='unshare') }}"><i class="far fa-share-square" style="color: #51a2d1;"></i></a>
+            {% else %}
+            <a href="{{ url_for('share_post', post_id=share.post_id, action='share') }}"><i style="color: #30303d;" class="far fa-share-square"></i></a>
+            {% endif %}
+            {{ share.posts.shares.count() }}
+          </div>
+        </div>
+        {% endfor %}
+
+        {% else %}
+        <div class="col-md-4 col-md-offset-4 mx-auto text-center" style="padding: 10px 20px; max-width: 600px;">
+          <p> Você não compartilhou nenhuma postagem.</p>
+        </div>
+      </div>
+        {% endif %}
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header bg-dark" id="headingThree">
+      <h5 class="mb-0 text-center">
+        <button class="btn btn-link collapsed text-white" style="text-decoration: none" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+          Postagens curtidas:
+        </button>
+      </h5>
+    </div>
+    <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordionExample">
+      <div class="card-body">
+      {% if like.count() > 0 %}
+      {% for like in like %}
+      <div class="col-md-4 col-md-offset-4 mx-auto pt-5" style="padding: 10px 20px; max-width: 600px;">
+        <div class="media mb-3">
+          <img class="rounded-circle" style="height: 65px; width: 65px; margin-right: 16px;" src="{{ url_for('static', filename='img/' + like.posts.author.pic) }}">
+          <div class="media-body">
+            <div style="padding-bottom: 1px; margin-bottom: 4px; border-bottom: 1px solid #e3e3e3">
+              <a class="mr-2" style="word-break: break-all;" href="{{ url_for('user', username=like.posts.author.username)}}">@{{ like.posts.author.username }}</a>
+              <small class="text-muted">{{ like.posts.date.strftime('%d/%m/%Y') }}</small>
+              {% if like.posts.edit == 1 %}
+              <small class="text-muted">(Editado)</small>
+              {% endif %}
+              {% if current_user == like.posts.author %}
+              <a href="{{ url_for('update_post', post_id=like.post_id)}}"><i class="fas fa-cog" style="color: #030322;"></i></a>
+              {% endif %}
+            </div>
+              <h2><a style="word-break: break-word; color: #444444; text-decoration: none;" href="{{ url_for('post', post_id=like.post_id)}}">{{ like.posts.title }}</a></h2>
+              <p style="word-break: break-word;">{{ like.posts.content }}</p>
+            <div class="pb-2">
+            {% if like.posts.pic != "0" %}
+            <img class="rounded" style="height: 50%; width: 50%" src="{{ url_for('static', filename='img/' + like.posts.pic) }}" alt="">
+            {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row justify-content-around pb-1 mb-3" style="border-bottom: 1px solid #e3e3e3">
+        <div>
+        {% if current_user.has_liked_post(like.posts) %}
+        <a href="{{ url_for('like_post', post_id=like.post_id, action='unlike') }}"><i class="fas fa-heart" style="color: #b80707;"></i></a>
+        {% else %}
+        <a href="{{ url_for('like_post', post_id=like.post_id, action='like') }}"><i style="color: #30303d;" class="far fa-heart"></i></a>
+        {% endif %}
+        {{ like.posts.likes.count() }}
+        </div>
+        <div>
+          <a href="{{ url_for('post', post_id=like.post_id)}}"> <i class="fas fa-comment"></i></a> {{ like.posts.comments.count() }}
+        </div>
+        <div>
+          {% if current_user.has_shared_post(like.posts) %}
+          <a href="{{ url_for('share_post', post_id=like.post_id, action='unshare') }}"><i class="far fa-share-square" style="color: #51a2d1;"></i></a>
+          {% else %}
+          <a href="{{ url_for('share_post', post_id=like.post_id, action='share') }}"><i style="color: #30303d;" class="far fa-share-square"></i></a>
+          {% endif %}
+          {{ like.posts.shares.count() }}
+        </div>
+      </div>
+      {% endfor %}
+      {% else %}
+      <div class="col-md-4 col-md-offset-4 mx-auto text-center" style="padding: 10px 20px; max-width: 600px;">
+      <p> Você não curtiu nenhuma postagem.</p>
+      </div>
+      {% endif %}
+    </div>
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="col-md-4 col-md-offset-4 mx-auto pt-5 text-center">
+  <img width="125px" height="125px" class="rounded-circle account-img" src="{{ image_file }}">
+  <h2 class="account-heading text-white" style="word-break: break-all;">{{ current_user.username }}</h2>
+  <p class="text-secundary text-white" style="word-break: break-all;"> {{ current_user.name }} </p>
+  <p class="text-secundary text-white" style="word-break: break-all;"> {{ current_user.card }} </p>
+  <p class="text-white">{{ current_user.followers.count() }} seguidores, {{ current_user.followed.count() }} seguindo.</p>
+  <a href="{{url_for('atualizar_perfil')}}"> <button class="btn btn-info"> Atualizar Perfil </button></a>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+  {% for category, message in messages %}
+  <div class="alert alert-{{ category }} mt-2">
+    {{ message }}
+  </div>
+  {% endfor %}
+{% endif %}
+{% endwith %}
+</div>
+<div class="accordion col-md-6 mx-auto pt-5" id="accordionExample">
+<div class="card" style="background-color:rgb(52, 55, 56);">
+  <div class="card-header bg-dark" id="headingOne">
+    <h5 class="mb-0 text-center">
+    <button class="btn btn-link text-white" style="text-decoration: none;" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+    Suas postagens:
+    </button>
+    </h5>
+  </div>
+  <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample" >
+    <div class="card-body">
+  {% if posts.count() > 0 %}
+  {% for post in posts %}
+    <div class="col-md-4 col-md-offset-4 mx-auto pt-5" style="padding: 10px 20px; max-width: 600px;">
+      <div class="media mb-3">
+        <img class="rounded-circle" style="height: 65px; width: 65px; margin-right: 16px;" src="{{ url_for('static', filename='img/' + post.author.pic) }}">
+          <div class="media-body">
+            <div style="padding-bottom: 1px; margin-bottom: 4px; border-bottom: 1px solid #777676;">
+              <a class="mr-2" style="word-break: break-all;" href="{{ url_for('user', username=post.author.username)}}">@{{ post.author.username }}</a>
+              <small class="text-muted">{{ post.date.strftime('%d/%m/%Y') }}</small>
+              {% if post.edit == 1 %}
+              <small class="text-muted">(Editado)</small>
+              {% endif %}
+              {% if current_user == post.author %}
+              <a href="{{ url_for('update_post', post_id=post.id)}}"><i class="fas fa-cog" style="color: #8a8ab4;"></i></a>
+              {% endif %}
+            </div>
+        <h2 style="word-break: break-word; color: #e9e9e9; text-decoration: none;" >{{ post.title }}</h2>
+        <p style="word-break: break-word; color: white;">{{ post.content }}</p>
+            <div class="pb-2">
+            {% if post.pic != "0" %}
+            <img class="rounded" style="height: 50%; width: 50%" src="{{ url_for('static', filename='img/' + post.pic) }}" alt="">
+            {% endif %}
+            </div>
+          </div>
+          </div>
+        </div>
+      <div class="row justify-content-around pb-1 mb-3" style="border-bottom: 1px solid #777676;">
+        <div class="row">
+        {% if current_user.has_liked_post(post) %}
+        <a href="{{ url_for('like_post', post_id=post.id, action='unlike') }}"><i class="fas fa-heart" style="color: #b80707;"></i></a>
+        {% else %}
+        <a href="{{ url_for('like_post', post_id=post.id, action='like') }}"><i style="color: #777676;" class="far fa-heart"></i></a>
+        {% endif %}
+        <div class=" ml-1 text-white">{{ post.likes.count() }}</div>
+        </div>
+          <div class="row">
+            <a href="{{ url_for('post', post_id=post.id)}}"> <i class="fas fa-comment"></i></a> 
+            <div class="ml-1 text-white"> {{ post.comments.count() }}</div>
+          </div>
+          <div class="row">
+          {% if current_user.has_shared_post(post) %}
+          <a href="{{ url_for('share_post', post_id=post.id, action='unshare') }}"><i class="far fa-share-square" style="color: #51a2d1;"></i></a>
+          {% else %}
+          <a href="{{ url_for('share_post', post_id=post.id, action='share') }}"><i style="color: #777676;" class="far fa-share-square"></i></a>
+          {% endif %}
+          <div class="ml-1 text-white">{{ post.shares.count() }}</div>
+          </div>
+      </div>
+{% endfor %}
+{% else %}
+<div class="col-md-4 col-md-offset-4 mx-auto text-center" style="padding: 10px 20px; max-width: 600px;">
+<p class="text-white"> Você não fez nenhuma postagem.</p>
+</div>
+{% endif %}
+</div>
+  </div>
+</div>
+<div class="card" style="background-color:rgb(52, 55, 56);">
+  <div class="card-header bg-dark" id="headingTwo">
+    <h5 class="mb-0 text-center">
+      <button class="btn btn-link collapsed text-white" style="text-decoration: none" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+        Postagens compartilhadas:
+      </button>
+    </h5>
+  </div>
+  <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+    <div class="card-body">
+      {% if share.count() > 0 %}
+      {% for share in share %}
+      <div class="col-md-4 col-md-offset-4 mx-auto pt-5" style="padding: 10px 20px; max-width: 600px;">
+        <div class="media mb-3">
+          <img class="rounded-circle" style="height: 65px; width: 65px; margin-right: 16px;" src="{{ url_for('static', filename='img/' + share.posts.author.pic) }}">
+          <div class="media-body">
+            <div style="padding-bottom: 1px; margin-bottom: 4px; border-bottom: 1px solid #777676;">
+              <a class="mr-2" style="word-break: break-all;" href="{{ url_for('user', username=share.posts.author.username)}}">@{{ share.posts.author.username }}</a>
+              <small class="text-muted">{{ share.posts.date.strftime('%d/%m/%Y') }}</small>
+              {% if share.posts.edit == 1 %}
+              <small class="text-muted">(Editado)</small>
+              {% endif %}
+              {% if current_user == share.posts.author %}
+              <a href="{{ url_for('update_post', post_id=share.post_id)}}"><i class="fas fa-cog" style="color: #8a8ab4;"></i></a>
+              {% endif %}
+            </div>
+              <h2><a style="word-break: break-word; color: #e9e9e9; text-decoration: none;" href="{{ url_for('post', post_id=share.post_id)}}">{{ share.posts.title }}</a></h2>
+              <p style="word-break: break-word; color: white;">{{ share.posts.content }}</p>
+            <div class="pb-2">
+            {% if share.posts.pic != "0" %}
+            <img class="rounded" style="height: 50%; width: 50%" src="{{ url_for('static', filename='img/' + share.posts.pic) }}" alt="">
+            {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row justify-content-around pb-1 mb-3" style="border-bottom: 1px solid #777676;">
+        <div class="row">
+        {% if current_user.has_liked_post(share.posts) %}
+        <a href="{{ url_for('like_post', post_id=share.post_id, action='unlike') }}"><i class="fas fa-heart" style="color: #b80707;"></i></a>
+        {% else %}
+        <a href="{{ url_for('like_post', post_id=share.post_id, action='like') }}"><i style="color: #777676;" class="far fa-heart"></i></a>
+        {% endif %}
+        <div class="ml-1 text-white">{{ share.posts.likes.count() }}</div>
+        </div>
+        <div class="row">
+          <a href="{{ url_for('post', post_id=share.post_id)}}"> <i class="fas fa-comment"></i></a> 
+          <div class="ml-1 text-white">{{ share.posts.comments.count() }}</div>
+        </div>
+        <div class="row">
+          {% if current_user.has_shared_post(share.posts) %}
+          <a href="{{ url_for('share_post', post_id=share.post_id, action='unshare') }}"><i class="far fa-share-square" style="color: #51a2d1;"></i></a>
+          {% else %}
+          <a href="{{ url_for('share_post', post_id=share.post_id, action='share') }}"><i style="color: #777676;" class="far fa-share-square"></i></a>
+          {% endif %}
+          <div class="ml-1 text-white">{{ share.posts.shares.count() }}</div>
+        </div>
+      </div>
+      {% endfor %}
+
+      {% else %}
+      <div class="col-md-4 col-md-offset-4 mx-auto text-center" style="padding: 10px 20px; max-width: 600px;">
+        <p class="text-white"> Você não compartilhou nenhuma postagem.</p>
+      </div>
+    </div>
+      {% endif %}
+  </div>
+</div>
+<div class="card" style="background-color:rgb(52, 55, 56);">
+  <div class="card-header bg-dark" id="headingThree">
+    <h5 class="mb-0 text-center">
+      <button class="btn btn-link collapsed text-white" style="text-decoration: none" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+        Postagens curtidas:
+      </button>
+    </h5>
+  </div>
+  <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordionExample">
+    <div class="card-body">
+    {% if like.count() > 0 %}
+    {% for like in like %}
+    <div class="col-md-4 col-md-offset-4 mx-auto pt-5" style="padding: 10px 20px; max-width: 600px;">
+      <div class="media mb-3">
+        <img class="rounded-circle" style="height: 65px; width: 65px; margin-right: 16px;" src="{{ url_for('static', filename='img/' + like.posts.author.pic) }}">
+        <div class="media-body">
+          <div style="padding-bottom: 1px; margin-bottom: 4px; border-bottom: 1px solid #777676;">
+            <a class="mr-2" style="word-break: break-all;" href="{{ url_for('user', username=like.posts.author.username)}}">@{{ like.posts.author.username }}</a>
+            <small class="text-muted">{{ like.posts.date.strftime('%d/%m/%Y') }}</small>
+            {% if like.posts.edit == 1 %}
+            <small class="text-muted">(Editado)</small>
+            {% endif %}
+            {% if current_user == like.posts.author %}
+            <a href="{{ url_for('update_post', post_id=like.post_id)}}"><i class="fas fa-cog" style="color: #8a8ab4;"></i></a>
+            {% endif %}
+          </div>
+            <h2><a style="word-break: break-word; color: #e9e9e9; text-decoration: none;" href="{{ url_for('post', post_id=like.post_id)}}">{{ like.posts.title }}</a></h2>
+            <p style="word-break: break-word; color: white;">{{ like.posts.content }}</p>
+          <div class="pb-2">
+          {% if like.posts.pic != "0" %}
+          <img class="rounded" style="height: 50%; width: 50%" src="{{ url_for('static', filename='img/' + like.posts.pic) }}" alt="">
+          {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row justify-content-around pb-1 mb-3" style="border-bottom: 1px solid #777676;">
+      <div class="row">
+      {% if current_user.has_liked_post(like.posts) %}
+      <a href="{{ url_for('like_post', post_id=like.post_id, action='unlike') }}"><i class="fas fa-heart" style="color: #b80707;"></i></a>
+      {% else %}
+      <a href="{{ url_for('like_post', post_id=like.post_id, action='like') }}"><i style="color: #777676;" class="far fa-heart"></i></a>
+      {% endif %}
+      <div class="ml-1 text-white">{{ like.posts.likes.count() }}</div>
+      </div>
+      <div class="row">
+        <a href="{{ url_for('post', post_id=like.post_id)}}"> <i class="fas fa-comment"></i></a> 
+        <div class="ml-1 text-white">{{ like.posts.comments.count() }}</div>
+      </div>
+      <div class="row">
+        {% if current_user.has_shared_post(like.posts) %}
+        <a href="{{ url_for('share_post', post_id=like.post_id, action='unshare') }}"><i class="far fa-share-square" style="color: #51a2d1;"></i></a>
+        {% else %}
+        <a href="{{ url_for('share_post', post_id=like.post_id, action='share') }}"><i style="color: #777676;" class="far fa-share-square"></i></a>
+        {% endif %}
+        <div class="ml-1 text-white">{{ like.posts.shares.count() }}</div>
+      </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="col-md-4 col-md-offset-4 mx-auto text-center" style="padding: 10px 20px; max-width: 600px;">
+    <p class="text-white"> Você não curtiu nenhuma postagem.</p>
+    </div>
+    {% endif %}
+  </div>
+  </div>
+</div>
+</div>
+{% endif %}
+{% endblock %}

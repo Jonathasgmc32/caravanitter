@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+{% if current_user.dark_mode == false %}
+<div class=" mx-auto pt-5 text-center">
+    <img style="height: 300px; width: 300px;"src="{{ url_for('static', filename='img/elmo_impressionado.png') }}" alt="">
+    <h2>Página não encontrada. Confira a URL e tente novamente.</h2>
+    <div class="text-center pt-2">
+        <a href="{{ url_for('index')}}"> <button type="button" class="btn btn-success" data-dismiss="modal">Voltar à Página Inicial</button></a>
+    </div>
+</div>
+{% else %}
+<div class=" mx-auto pt-5 text-center">
+    <img style="height: 300px; width: 300px;"src="{{ url_for('static', filename='img/elmo_impressionado.png') }}" alt="">
+    <h2 class="text-white">Página não encontrada. Confira a URL e tente novamente.</h2>
+    <div class="text-center pt-2">
+        <a href="{{ url_for('index')}}"> <button type="button" class="btn btn-success" data-dismiss="modal">Voltar à Página Inicial</button></a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

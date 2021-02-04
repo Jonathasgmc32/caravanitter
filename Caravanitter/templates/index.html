@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="jumbotron bg-transparent col-md-6 col-md-offset-6 mx-auto text-center">
+    <h1>Seja bem-vindo ao Caravanítter</h1>
+    <p class="lead">Entre para continuar. Caso não tenha um conta, Cadastre-se agora.</p>
+    <div class="row justify-content-around">
+        <p><a class="btn btn-lg btn-success" href="{{url_for('login')}}" role="button">Entre Agora!</a></p>
+        <p><a class="btn btn-lg btn-primary" href="{{url_for('register')}}" role="button">Cadastre-se</a></p>
+
+    </div>
+  </div>
+{% endblock %}

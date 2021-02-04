@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% if current_user.is_authenticated %}
+{% if current_user.dark_mode == false %}
+<div class="col-md-4 col-md-offset-4 mx-auto" style="padding: 10px 20px; border: 1px solid #dddddd; border-radius: 3px; margin: 80px 0 20px 0; max-width: 600px;">
+    <h2>Editar comentário:</h2>
+    <form action="" method="post" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <div class="mb-2">
+        {{ form.content(class="form-control contador",  maxlength="240", placeholder="Insira um comentário:", style="resize: none;")}}
+        <div><b><span class="caracteres">0</span>/240</b></div>
+      </div>
+      <div class="form-group">
+        {{ form.picture.label() }}
+        {{ form.picture(class="form-control-file") }}
+        {% if form.picture.errors %}
+
+        {% for error in form.picture.errors %}
+            <span class="text-danger"> {{ error }} </span></br>
+        {% endfor %}
+        {% endif %}
+
+      </div>
+      <div class="row justify-content-around">
+        {{ form.submit(class="btn btn-info") }}
+        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">Exluir Comentário</button>
+        <a href="{{url_for('post', post_id=comment.post_id)}}"><button type="button" class="btn btn-primary">Voltar</button></a>
+      </div>
+    </form>
+</div>
+{% else %}
+<div class="col-md-4 col-md-offset-4 mx-auto" style="padding: 10px 20px; border-radius: 10px; background-color:rgb(52, 55, 56); margin: 80px 0 20px 0; max-width: 600px;">
+    <h2 class="text-white">Editar comentário:</h2>
+    <form action="" method="post" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <div class="mb-2">
+        {{ form.content(class="form-control text-white contador", placeholder="Insira um comentário:",  maxlength="240", style="resize: none; background-color:rgb(60, 60, 60); border: None;")}}
+        <div class="text-white"><b><span class="caracteres">0</span>/240</b></div>
+      </div>
+      <div class="form-group">
+        {{ form.picture.label(class="text-white") }}
+        {{ form.picture(class="form-control-file text-white") }}
+        {% if form.picture.errors %}
+
+        {% for error in form.picture.errors %}
+            <span class="text-danger"> {{ error }} </span></br>
+        {% endfor %}
+        {% endif %}
+
+      </div>
+      <div class="row justify-content-around">
+        {{ form.submit(class="btn btn-info") }}
+        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModalDark">Exluir Comentário</button>
+        <a href="{{url_for('post', post_id=comment.post_id)}}"><button type="button" class="btn btn-primary">Voltar</button></a>
+      </div>
+    </form>
+</div>
+{% endif %}
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel">Excluir Comentário</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Deseja mesmo excluir esse comentário?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+        <form action="{{ url_for('delete_comment', comment_id=comment.id)}}" method="POST">
+          <input type="submit" value="Excluir" class="btn btn-danger"></input>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="deleteModalDark" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document" style="border: none;">
+    <div class="modal-content" style="border-radius: 10px;">
+      <div class="modal-header bg-dark" style="border: none;">
+        <h5 class="modal-title text-white" id="deleteModalLabel">Excluir Comentário</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Fechar">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body text-white" style="background-color:rgb(41, 43, 44);">
+        Deseja mesmo excluir esse comentário?
+      </div>
+      <div class="modal-footer" style="background-color:rgb(41, 43, 44);">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+        <form action="{{ url_for('delete_comment', comment_id=comment.id)}}" method="POST">
+          <input type="submit" value="Excluir" class="btn btn-danger"></input>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
